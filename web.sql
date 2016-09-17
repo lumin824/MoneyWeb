@@ -8,7 +8,7 @@ CREATE TABLE `think_user` (
   PRIMARY KEY (`id`),
   KEY `pid` (`pid`),
   UNIQUE KEY `mobile` (`mobile`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
 CREATE TABLE `think_loan` (
   `id` int(16) unsigned NOT NULL AUTO_INCREMENT COMMENT '贷款ID',
@@ -21,7 +21,7 @@ CREATE TABLE `think_loan` (
   `endDate` char(255) NOT NULL COMMENT '结束日期',
   `icloud` char(255) NOT NULL DEFAULT '' COMMENT '苹果账号',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
 CREATE TABLE `think_loan_stage` (
   `id` int(16) unsigned NOT NULL AUTO_INCREMENT COMMENT '贷款分期ID',
@@ -31,4 +31,4 @@ CREATE TABLE `think_loan_stage` (
   `bj` char(255) NOT NULL COMMENT '本金',
   `lx` char(255) NOT NULL COMMENT '利息',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
