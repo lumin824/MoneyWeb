@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+    <title></title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href="/static/hp/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+    <link href="/static/hp/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+
+    <!-- jqgrid-->
+    <link href="/static/hp/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
+
+    <link href="/static/hp/css/animate.css" rel="stylesheet">
+    <link href="/static/hp/css/style.css?v=4.1.0" rel="stylesheet">
+
+    <style>
+        /* Additional style to fix warning dialog position */
+
+        #alertmod_table_list_2 {
+            top: 900px !important;
+        }
+    </style>
+
+</head>
+
+<body class="gray-bg">
+    <div class="wrapper wrapper-content  animated fadeInRight">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="ibox ">
+                    <div class="ibox-title">
+                        <h5>贷款管理</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <div class="jqGrid_wrapper">
+                            <table id="table_list_2"></table>
+                            <div id="pager_list_2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 全局js -->
+    <script src="/static/hp/js/jquery.min.js?v=2.1.4"></script>
+    <script src="/static/hp/js/bootstrap.min.js?v=3.3.6"></script>
+
+    <!-- Peity -->
+    <script src="/static/hp/js/plugins/peity/jquery.peity.min.js"></script>
+
+    <!-- jqGrid -->
+    <script src="/static/hp/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
+    <script src="/static/hp/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
+
+    <!-- 自定义js -->
+    <script src="/static/hp/js/content.js?v=1.0.0"></script>
+
+    <!-- Page-Level Scripts -->
+    <script>
+        $(function () {
+            $.jgrid.defaults.styleUI = 'Bootstrap';
+
+            $("#table_list_2").jqGrid({
+                url: '/admin/loan/list',
+                editurl: '/admin/loan/edit',
+                datatype: 'json',
+                height: '100%',
+                autowidth: true,
+                shrinkToFit: true,
+                rowNum: 20,
+                rowList: [10, 20, 30],
+                colNames: ['序号', '开始日期', '结束日起', '手机号', '身份证号', '姓名', '金额', '分期数', '苹果账号', '操作'],
+                colModel: [
+                    {
+                        name: 'id',
+                        search: true,
+                        width:50,
+                    },
+                    {
+                        name: 'startDate',
+                        editable: true,
+                        width:80,
+                    },
+                    {
+                        name: 'endDate',
+                        editable: true,
+                        width:80,
+                    },
+                    {
+                        name: 'mobile',
+                        editable: true,
+                        width:80,
+                    },
+                    {
+                        name: 'idno',
+                        editable: true,
+                        width:120,
+                    },
+                    {
+                        name: 'name',
+                        editable: true,
+                        width:60,
+                    },
+                    {
+                        name: 'money',
+                        editable: true,
+                        width:60,
+                    },
+                    {
+                        name: 'stage',
+                        editable: true,
+                        width:60,
+                    },{
+                        name: 'icloud',
+                        editable: true,
+                    },{
+                        name: 'id',
+                        formatter: function(cell, opt, row){
+                          return '<button class="btn btn-primary J_openTab" type="button" href="/admin/loan/stage?id='+cell+'" data-index="loan_'+cell+'">查看分期</button>';
+                        }
+                    }
+                ],
+                pager: "#pager_list_2",
+                viewrecords: true,
+                add: true,
+                edit: true,
+                addtext: 'Add',
+                edittext: 'Edit',
+                hidegrid: false
+            });
+
+
+            // Setup buttons
+            $("#table_list_2").jqGrid('navGrid', '#pager_list_2', {
+                edit: true,
+                add: true,
+                del: true,
+                search: true
+            }, {
+                reloadAfterSubmit: true
+            });
+
+            // Add responsive to jqGrid
+            $(window).bind('resize', function () {
+                var width = $('.jqGrid_wrapper').width();
+                $('#table_list_2').setGridWidth(width);
+            });
+        });
+    </script>
+
+</body>
+
+</html>
