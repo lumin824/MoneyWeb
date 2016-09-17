@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "babel-runtime": "6.x.x",
+    "lodash": "^4.15.0",
     "moment": "^2.15.0",
     "node-xlsx": "^0.7.2",
     "nunjucks": "^2.2.0",
