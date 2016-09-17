@@ -2,7 +2,7 @@
   "apps": [{
     "name": "MoneyWeb",
     "script": "www/production.js",
-    "cwd": "/Users/lumin/GitHub/MoneyWeb",
+    "cwd": "/root/MoneyWeb",
     "exec_mode": "cluster",
     "instances": 0,
     "max_memory_restart": "1G",
@@ -10,7 +10,7 @@
     "node_args": [],
     "args": [],
     "env": {
-      
+
     }
   }]
 }
