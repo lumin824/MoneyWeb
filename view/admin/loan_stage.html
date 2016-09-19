@@ -34,18 +34,18 @@
                            <thead>
                                <tr>
                                    <th>期数</th>
-                                   <th>管理费</th>
-                                   <th>本金</th>
-                                   <th>利息</th>
+                                   <th>最迟还款日期</th>
+                                   <th>管理费(已还/应还)</th>
+                                   <th>本金(已还/应还)</th>
                                </tr>
                            </thead>
                            <tbody>
                               {% for o in list %}
                                <tr>
                                    <td>{{o.stage}}</td>
-                                   <td>{{o.glf}}</td>
-                                   <td>{{o.bj}}</td>
-                                   <td>{{o.lx}}</td>
+                                   <td>{{o.end_time}}</td>
+                                   <td>{{o.lixi_2}}/{{o.lixi_1}}</td>
+                                   <td>{{o.benjin_2}}/{{o.benjin_1}}</td>
                                </tr>
                                {% endfor %}
                            </tbody>

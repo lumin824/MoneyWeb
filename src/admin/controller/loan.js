@@ -62,8 +62,8 @@ export default class extends Base {
   async stageAction(){
     let {id} = this.param();
 
-    let list = await this.loanStage.where({loanId:id}).select();
-    this.assign('list', list);
+    let list = await this.loanStage.where({loan_id:id}).select();
+    this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
     return this.display();
   }
 
@@ -76,51 +76,64 @@ export default class extends Base {
         let [header, ...data] = list[0].data;
 
         _.each(data, async row => {
-          let [endDate,startDate,mobile,idno,name,money,stage, ...stageList] = row;
-          console.log([mobile , idno , name , money , stage]);
+          let [end_date,start_date,mobile,idno,name,money,stage, ...stageList] = row;
           let icloud = stageList[12*3-1];
           if(mobile && idno && name && money && stage){
             let m = null;
-            if(_.isNumber(startDate)){
-              startDate = _.template('${y}.${m}.${d}')(x.SSF.parse_date_code(startDate));
-            }else if( m = startDate.match(/(\d+)月(\d+).+/)){
-              startDate = `${year}.${m[1]}.${m[2]}`;
+            if(_.isNumber(start_date)){
+              start_date = _.template('${y}.${m}.${d}')(x.SSF.parse_date_code(start_date));
+            }else if( m = start_date.match(/(\d+)月(\d+).+/)){
+              start_date = `${year}.${m[1]}.${m[2]}`;
             }else{
-              startDate = startDate.replace(/[/]/g,'.');
+              start_date = start_date.replace(/[/]/g,'.');
             }
-            if(_.isNumber(endDate))
+            if(_.isNumber(end_date))
             {
-              endDate = _.template('${y}.${m}.${d}')(x.SSF.parse_date_code(endDate));
-            }else if( m = endDate.match(/(\d+)月(\d+).+/)){
-              endDate = `${year}.${m[1]}.${m[2]}`;
+              end_date = _.template('${y}.${m}.${d}')(x.SSF.parse_date_code(end_date));
+            }else if( m = end_date.match(/(\d+)月(\d+).+/)){
+              end_date = `${year}.${m[1]}.${m[2]}`;
             }else{
-              endDate = endDate.replace(/[/]/g,'.');
+              end_date = end_date.replace(/[/]/g,'.');
             }
 
-            endDate = endDate.replace(/[/]/g,'.');
-            let loanId = await this.loan.add({
-              endDate, startDate,
-              mobile,idno,name,money,stage,icloud
+            let stageNum = 0;
+            if(stage && (m = stage.match(/\d+/))){
+              stageNum = m[0];
+            }
+
+            end_date = end_date.replace(/[/]/g,'.');
+            let start_time = moment(start_date, 'YYYY.MM.DD');
+            let end_time = moment(end_date, 'YYYY.MM.DD');
+            let loan_id = await this.loan.add({
+              start_time: start_time.unix(),end_time:end_time.unix(),
+              mobile,idno,name,money,total_stage:stage,icloud
             });
 
-            for(let i = 0; i < 100; i++){
-              let glf = stageList[i*3+0];
-              let bj = stageList[i*3+1];
-              let lx = stageList[i*3+2];
-              if(glf && bj && lx){
+            money = _.parseInt(money);
+            let i = 0;
+            let lixi_1 = Math.floor(money / 1000 * 21);
+            let benjin_1 = Math.floor(money / stageNum);
+            for(; i < 100; i++){
+              let lixi = stageList[i*3+0];
+              let benjin = stageList[i*3+1];
+              if(lixi && benjin){
+                start_time.add(7,'day');
                 await this.loanStage.add({
-                  loanId, stage:i+1,glf,bj,lx
+                  loan_id, stage:i+1,lixi_1,lixi_2:lixi,benjin_1,benjin_2:benjin, end_time: start_time.unix()
                 })
               }else{
                 break;
               }
             }
+
+            for(; i < stageNum - 1; i++){
+              start_time.add(7,'day');
+              await this.loanStage.add({
+                loan_id, stage:i+1, lixi_1,benjin_1,end_time: start_time.unix()
+              })
+            }
+
           }
-
-
-          // await this.loanStage.add({
-          //   loanId,
-          // })
 
           console.log(ret)
         });
@@ -131,5 +144,32 @@ export default class extends Base {
       return this.display();
     }
 
+  }
+
+  async repayAction(){
+    if(this.isAjax()){
+      let { page, rows, searchField, searchString, searchOper, sidx, sord} = this.param();
+
+      this.loanStage
+        .field('a.*,b.mobile,b.name,b.icloud')
+        .alias('a')
+        .join({
+          table:'loan',
+          as:'b',
+          join:'left',
+          on:['loan_id','id']
+        }).order({'end_time':'asc'});
+
+      let data = await this.loanStage.page(page, rows).countSelect();
+      return this.json({
+        page: data.currentPage,
+        records: data.count,
+        rows: data.data,
+        total: data.totalPages,
+      });
+    }
+    else{
+      return this.display();
+    }
   }
 }

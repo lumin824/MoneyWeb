@@ -37,7 +37,7 @@
             <div class="col-sm-12">
                 <div class="ibox ">
                     <div class="ibox-title">
-                        <h5>贷款管理</h5>
+                        <h5>还款查询</h5>
                     </div>
                     <div class="ibox-content">
                         <div class="jqGrid_wrapper">
@@ -70,64 +70,54 @@
             $.jgrid.defaults.styleUI = 'Bootstrap';
 
             $("#table_list_2").jqGrid({
-                url: '/admin/loan/list',
-                editurl: '/admin/loan/edit',
+                url: '/admin/loan/repay',
                 datatype: 'json',
                 height: '100%',
                 autowidth: true,
                 shrinkToFit: true,
                 rowNum: 100,
                 rowList: [100, 200, 500, 1000, 2000],
-                colNames: ['序号', '开始日期', '结束日起', '手机号', '身份证号', '姓名', '金额', '分期数', '苹果账号', '操作'],
+                colNames: ['最迟还款日期', '期数', '管理费(已还/应还)', '本金(已还/应还)', '手机号', '姓名', '苹果账号', '操作'],
                 colModel: [
                     {
-                        name: 'id',
-                        search: true,
-                        width:50,
-                    },
-                    {
-                        name: 'start_time',
-                        editable: true,
-                        width:80,
-                        formatter:'date',
-                        formatoptions: { srcformat:'u'}
-                    },
-                    {
                         name: 'end_time',
-                        editable: true,
                         width:80,
                         formatter:'date',
                         formatoptions: { srcformat:'u'}
-                    },
-                    {
+                    },{
+                      name: 'stage',
+                      sortable:false,
+                      width:30,
+                    },{
+                        width:100,
+                        sortable:false,
+                        formatter: function(cell, opt, row){
+                          let ret = row.lixi_2 + '/' + row.lixi_1;
+                          if(row.lixi_2 < row.lixi_1) ret = '<p class="text-danger">'+ret+'</p>';
+                          return ret;
+                        }
+                    },{
+                        width:100,
+                        sortable:false,
+                        formatter: function(cell, opt, row){
+                          let ret = row.benjin_2 + '/' + row.benjin_1;
+                          if(row.benjin_2 < row.benjin_1) ret = '<p class="text-danger">'+ret+'</p>';
+                          return ret;
+                        }
+                    },{
                         name: 'mobile',
-                        editable: true,
+                        sortable:false,
                         width:80,
-                    },
-                    {
-                        name: 'idno',
-                        editable: true,
-                        width:120,
-                    },
-                    {
+                    },{
                         name: 'name',
-                        editable: true,
-                        width:60,
-                    },
-                    {
-                        name: 'money',
-                        editable: true,
-                        width:60,
-                    },
-                    {
-                        name: 'total_stage',
-                        editable: true,
+                        sortable:false,
                         width:60,
                     },{
                         name: 'icloud',
-                        editable: true,
+                        sortable:false,
                     },{
-                        name: 'id',
+                        name: 'loan_id',
+                        sortable:false,
                         formatter: function(cell, opt, row){
                           return '<button class="btn btn-primary btn-xs J_openTab" type="button" href="/admin/loan/stage?id='+cell+'" data-index="loan_'+cell+'">查看分期</button>';
                         }
@@ -135,11 +125,16 @@
                 ],
                 pager: "#pager_list_2",
                 viewrecords: true,
-                add: true,
-                edit: true,
-                addtext: 'Add',
-                edittext: 'Edit',
-                hidegrid: false
+                hidegrid: false,
+                grouping: true,
+                groupingView: {
+                    groupField: ['end_time'],
+                    groupColumnShow: [true],
+                    groupText: ["<b>{0}</b>"],
+                    groupOrder: ["asc"],
+                    groupSummary: [false],
+                    groupCollapse: false
+                }
             });
 
 
@@ -162,5 +157,4 @@
     </script>
 
 </body>
-
 </html>

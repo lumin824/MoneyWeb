@@ -30,7 +30,6 @@ export default class extends Base {
           return this.json({errno:200,redirect:'/admin'})
         }
       }
-
     }
   }
 
