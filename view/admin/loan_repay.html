@@ -137,17 +137,6 @@
                 }
             });
 
-
-            // Setup buttons
-            $("#table_list_2").jqGrid('navGrid', '#pager_list_2', {
-                edit: true,
-                add: true,
-                del: true,
-                search: true
-            }, {
-                reloadAfterSubmit: true
-            });
-
             // Add responsive to jqGrid
             $(window).bind('resize', function () {
                 var width = $('.jqGrid_wrapper').width();
