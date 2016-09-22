@@ -14,6 +14,7 @@
     <link rel="shortcut icon" href="favicon.ico">
     <link href="/static/hp/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
     <link href="/static/hp/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+    <link href="/static/hp/css/plugins/iCheck/custom.css" rel="stylesheet">
 
     <!-- jqgrid-->
     <link href="/static/hp/css/plugins/jqgrid/ui.jqgrid.css?0820" rel="stylesheet">
@@ -40,6 +41,10 @@
                         <h5>还款查询</h5>
                     </div>
                     <div class="ibox-content">
+                        <div class="checkbox i-checks">
+                            <label><input id="lixi" type="checkbox"> <i></i> 管理费未还清</label>
+                            <label><input id="benjin" type="checkbox"> <i></i> 本金未还清</label>
+                        </div>
                         <div class="jqGrid_wrapper">
                             <table id="table_list_2"></table>
                             <div id="pager_list_2"></div>
@@ -61,12 +66,34 @@
     <script src="/static/hp/js/plugins/jqgrid/i18n/grid.locale-cn.js?0820"></script>
     <script src="/static/hp/js/plugins/jqgrid/jquery.jqGrid.min.js?0820"></script>
 
+    <!-- iCheck -->
+    <script src="/static/hp/js/plugins/iCheck/icheck.min.js"></script>
+
     <!-- 自定义js -->
     <script src="/static/hp/js/content.js?v=1.0.0"></script>
 
     <!-- Page-Level Scripts -->
     <script>
         $(function () {
+            $('.i-checks').iCheck({
+                checkboxClass: 'icheckbox_square-green',
+                radioClass: 'iradio_square-green',
+            });
+
+            $('#lixi').on('ifChecked ifUnchecked', function(e){
+              var isChecked = e.type == 'ifChecked';
+              var postData = $('#table_list_2').jqGrid('getGridParam', 'postData');
+              $.extend(postData, { lixi: isChecked });
+              $('#table_list_2').jqGrid('setGridParam', { search: true }).trigger('reloadGrid', [{ page: 1}]);
+            });
+
+            $('#benjin').on('ifChecked ifUnchecked', function(e){
+              var isChecked = e.type == 'ifChecked';
+              var postData = $('#table_list_2').jqGrid('getGridParam', 'postData');
+              $.extend(postData, { benjin: isChecked });
+              $('#table_list_2').jqGrid('setGridParam', { search: true }).trigger('reloadGrid', [{ page: 1}]);
+            })
+
             $.jgrid.defaults.styleUI = 'Bootstrap';
 
             $("#table_list_2").jqGrid({

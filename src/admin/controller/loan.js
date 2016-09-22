@@ -60,11 +60,20 @@ export default class extends Base {
   }
 
   async stageAction(){
-    let {id} = this.param();
 
-    let list = await this.loanStage.where({loan_id:id}).select();
-    this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
-    return this.display();
+    if(this.isGet()){
+      let {id} = this.param();
+
+      let list = await this.loanStage.where({loan_id:id}).select();
+      this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
+      return this.display();
+    }else{
+      let {id, ...data} = this.param();
+      await this.loanStage.where({id:id}).update(data);
+      return this.json({errno:200});
+    }
+
+
   }
 
   async uploadAction(){
@@ -164,6 +173,13 @@ export default class extends Base {
           join:'left',
           on:['loan_id','id']
         }).order({'end_time':'asc'});
+
+      let { lixi, benjin } = this.param();
+      let where = _.compact([ lixi == 'true' && 'a.lixi_1 > a.lixi_2', benjin == 'true' && 'a.benjin_1 > a.benjin_2']).join(' or ');
+
+      if(where){
+        this.loanStage.where(where);
+      }
 
       let data = await this.loanStage.page(page, rows).countSelect();
       return this.json({
