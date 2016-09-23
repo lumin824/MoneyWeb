@@ -40,6 +40,12 @@
                         <h5>贷款管理</h5>
                     </div>
                     <div class="ibox-content">
+                      <div class="row">
+                        <div class="col-xs-6">
+                          <input id="key" type="text" placeholder="姓名、手机号、苹果id、身份证号" class="form-control ">
+                        </div>
+                      </div>
+                      <div class="hr-line-dashed"></div>
                         <div class="jqGrid_wrapper">
                             <table id="table_list_2"></table>
                             <div id="pager_list_2"></div>
@@ -67,6 +73,17 @@
     <!-- Page-Level Scripts -->
     <script>
         $(function () {
+
+          var timer;
+          $("#key").on("keyup", function() {
+            var self = this;
+            if(timer) { clearTimeout(timer); }
+            timer = setTimeout(function(){
+              var postData = $('#table_list_2').jqGrid('getGridParam', 'postData');
+              $.extend(postData, { key: self.value });
+              $('#table_list_2').jqGrid('setGridParam', { search: true }).trigger('reloadGrid', [{ page: 1}]);
+            },0);
+          });
             $.jgrid.defaults.styleUI = 'Bootstrap';
 
             $("#table_list_2").jqGrid({

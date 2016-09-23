@@ -24,11 +24,19 @@ export default class extends Base {
   }
 
   async listAction(){
-    let { page, rows, searchField, searchString, searchOper, sidx, sord} = this.param();
+    let { page, rows, searchField, searchString, searchOper, sidx, sord, key} = this.param();
 
     let db = this.loan;
-    if(searchField && searchString && searchOper){
-      this.loan.where({[searchField]:{['=']:searchString}});
+
+    let where2;
+    if(key){
+      where2 = `(mobile like '%${key}%' or name like '%${key}%' or icloud like '%${key}%' or idno like '%${key}%')`;
+    }
+
+    let where = _.compact([where2]).join(' and ');
+
+    if(where){
+      this.loan.where(where);
     }
 
     if(sidx && sord){
@@ -174,8 +182,15 @@ export default class extends Base {
           on:['loan_id','id']
         }).order({'end_time':'asc'});
 
-      let { lixi, benjin } = this.param();
-      let where = _.compact([ lixi == 'true' && 'a.lixi_1 > a.lixi_2', benjin == 'true' && 'a.benjin_1 > a.benjin_2']).join(' or ');
+      let { lixi, benjin, key } = this.param();
+      let where1 = _.compact([ lixi == 'true' && 'a.lixi_1 > a.lixi_2', benjin == 'true' && 'a.benjin_1 > a.benjin_2']).join(' or ');
+
+      let where2;
+      if(key){
+        where2 = `(b.mobile like '%${key}%' or b.name like '%${key}%' or b.icloud like '%${key}%')`;
+      }
+
+      let where = _.compact([where1, where2]).join(' and ');
 
       if(where){
         this.loanStage.where(where);
@@ -192,5 +207,11 @@ export default class extends Base {
     else{
       return this.display();
     }
+  }
+
+  async statAction(){
+    let list = await this.loanStage.query('select ym,sum(lixi_1) as lixi_1,sum(lixi_2) as lixi_2,sum(benjin_1) as benjin_1,sum(benjin_2) as benjin_2 from (select *, date_format(from_unixtime(end_time),\'%Y-%m\') as ym from think_loan_stage) a group by ym order by ym desc;');
+    this.assign('list', list);
+    return this.display();
   }
 }
