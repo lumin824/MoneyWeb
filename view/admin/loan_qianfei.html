@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+   <meta charset="utf-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+   <title></title>
+   <meta name="keywords" content="">
+   <meta name="description" content="">
+
+   <link rel="shortcut icon" href="favicon.ico">
+   <link href="/static/hp/css/bootstrap.min.css?v=3.3.6" rel="stylesheet">
+   <link href="/static/hp/css/font-awesome.css?v=4.4.0" rel="stylesheet">
+   <link href="/static/hp/css/plugins/iCheck/custom.css" rel="stylesheet">
+   <link href="/static/hp/css/animate.css" rel="stylesheet">
+   <link href="/static/hp/css/style.css?v=4.1.0" rel="stylesheet">
+
+</head>
+
+<body class="gray-bg">
+   <div class="wrapper wrapper-content animated fadeInRight">
+       <div class="row">
+           <div class="col-sm-12">
+               <div class="ibox float-e-margins">
+                   <div class="ibox-title">
+                       <h5>欠款统计</h5>
+                   </div>
+                   <div class="ibox-content">
+                     <p>点击编号显示欠款详情</p>
+                     <table class="table table-bordered">
+                         <thead>
+                             <tr>
+                                 <th>编号</th>
+                                 <th>姓名</th>
+                                 <th>手机号</td>
+                                 <th>icloud</td>
+                                 <th>未还时间</th>
+                                 <th>累计期数</th>
+                                 <th>累计利息</th>
+                                 <th>累计本金</th>
+                                 <th>操作</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                            {% for o in group %}
+                             <tr>
+                                 <td class="info-tip">{{o.info.id}}
+                                   <div class="hide">
+                                     <table>
+                                       <thead>
+                                         <tr>
+                                           <th>期数</th>
+                                           <th>最迟还款日期</th>
+                                           <th>管理费(已还)</th>
+                                           <th>管理费(应还)</th>
+                                           <th>本金(已还)</th>
+                                           <th>本金(应还)</th>
+                                         </tr>
+                                       </thead>
+                                       <tbody>
+                                         {% for p in o.items %}
+                                         <tr>
+                                           <td>{{p.stage}}</td>
+                                           <td>{{p.end_time}}</td>
+                                           <td>{{p.lixi_2}}</td>
+                                           <td>{{p.lixi_1}}</td>
+                                           <td>{{p.benjin_2}}</td>
+                                           <td>{{p.benjin_1}}</td>
+                                         </tr>
+                                         {% endfor %}
+                                       </tbody>
+                                     </table>
+                                   </div>
+                                 </td>
+                                 <td>{{o.info.name}}</td>
+                                 <th>{{o.info.mobile}}</td>
+                                 <th>{{o.info.icloud}}</td>
+                                 <td>{{o.info.pay_time}}</td>
+                                 <td>{{o.info.sum_stage}}</td>
+                                 <td>{{o.info.sum_lixi}}</td>
+                                 <td>{{o.info.sum_benjin}}</td>
+                                 <td><button class="btn btn-primary btn-xs J_openTab" type="button" href="/admin/loan/stage?id={{o.info.id}}" data-index="loan_{{o.info.id}}">查看分期</button></td>
+                             </tr>
+                             {% endfor %}
+                         </tbody>
+                     </table>
+                   </div>
+               </div>
+           </div>
+       </div>
+   </div>
+
+   <!-- 全局js -->
+   <script src="/static/hp/js/jquery.min.js?v=2.1.4"></script>
+   <script src="/static/hp/js/bootstrap.min.js?v=3.3.6"></script>
+
+
+
+   <!-- Peity -->
+   <script src="/static/hp/js/plugins/peity/jquery.peity.min.js"></script>
+
+   <!-- 自定义js -->
+   <script src="/static/hp/js/content.js?v=1.0.0"></script>
+
+
+   <!-- iCheck -->
+   <script src="/static/hp/js/plugins/iCheck/icheck.min.js"></script>
+
+   <!-- Peity -->
+   <script src="/static/hp/js/demo/peity-demo.js"></script>
+
+   <!-- layer javascript -->
+    <script src="/static/hp/js/plugins/layer/layer.min.js"></script>
+
+   <script>
+       $(document).ready(function () {
+           $('.i-checks').iCheck({
+               checkboxClass: 'icheckbox_square-green',
+               radioClass: 'iradio_square-green',
+           });
+
+           $('table tbody').on('click', '.btn-save', function(){
+             $root = $(this).parents('tr');
+             var data = {};
+             $root.find('input').each(function(o){
+               data[this.name] = this.value;
+             });
+
+             data.id = $root.data('id');
+             console.log(data);
+             var url = '/admin/loan/stage', type = 'post';
+             $.ajax({
+               url: url,
+               type: type,
+               data: data,
+               success: function(resp){
+                 if(resp.errno == 200){
+                   alert('修改成功')
+                 }else{
+                   alert(resp.errmsg);
+                 }
+               }
+             });
+           });
+
+           $('table tbody').on('click', '.info-tip', function(){
+             layer.tips($('.hide', this).html(), this, {maxWidth:'1000',offset:['0px','100px']});
+           })
+       });
+   </script>
+
+</body>
+
+</html>

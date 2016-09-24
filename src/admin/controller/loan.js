@@ -214,4 +214,34 @@ export default class extends Base {
     this.assign('list', list);
     return this.display();
   }
+
+  async qianfeiAction(){
+    let now = moment().unix();
+    let list = await this.loanStage
+    .field('a.*,b.mobile,b.name,b.icloud')
+    .alias('a')
+    .join({
+      table:'loan',
+      as:'b',
+      join:'left',
+      on:['loan_id','id']
+    }).where(`(a.benjin_1 > a.benjin_2 or a.lixi_1 > a.lixi_2) and a.end_time < ${now}`).order('a.end_time asc').select();
+
+    list = _.map(list, o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')}));
+    let group = _.map(_.groupBy(list,'loan_id'), (o,k)=>({
+      info:{
+        id:k,
+        name:o[0].name,
+        mobile:o[0].mobile,
+        icloud:o[0].icloud,
+        pay_time:o[0].end_time,
+        sum_stage: _.size(o),
+        sum_lixi: _.sumBy(o, 'lixi_1') - _.sumBy(o, 'lixi_2'),
+        sum_benjin: _.sumBy(o, 'benjin_1') - _.sumBy(o, 'benjin_2')
+      },
+      items:o}));
+    this.assign('group', _.sortBy(group, 'info.pay_time'));
+    this.assign('list', list);
+    return this.display();
+  }
 }
