@@ -93,6 +93,7 @@ export default class extends Base {
     }else if(oper == 'del'){
       let { id } = data;
       await this.loan.where({id}).delete();
+      await this.loanStage.where({loan_id:id}).delete();
     }
     return this.json({});
   }
