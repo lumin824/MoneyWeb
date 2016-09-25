@@ -40,6 +40,10 @@
                         <h5>贷款管理</h5>
                     </div>
                     <div class="ibox-content">
+                      <p>添加记录的开始日期格式：2016-09-10</p>
+                      <p>添加记录结束日期＝开始日期＋期数＊7天</p>
+                      <p>添加记录会根据分期数和金额生成分期信息</p>
+                      <p>编辑只会编辑信息，不会修改分期信息</p>
                       <div class="row">
                         <div class="col-xs-6">
                           <input id="key" type="text" placeholder="姓名、手机号、苹果id、身份证号" class="form-control ">
@@ -95,7 +99,7 @@
                 shrinkToFit: true,
                 rowNum: 100,
                 rowList: [100, 200, 500, 1000, 2000],
-                colNames: ['序号', '开始日期', '结束日起', '手机号', '身份证号', '姓名', '金额', '分期数', '苹果账号', '操作'],
+                colNames: ['序号', '开始日期', '结束日期', '手机号', '身份证号', '姓名', '金额', '分期数', '苹果账号', '备注','操作'],
                 colModel: [
                     {
                         name: 'id',
@@ -111,7 +115,6 @@
                     },
                     {
                         name: 'end_time',
-                        editable: true,
                         width:80,
                         formatter:'date',
                         formatoptions: { srcformat:'u'}
@@ -142,6 +145,9 @@
                         width:60,
                     },{
                         name: 'icloud',
+                        editable: true,
+                    },{
+                        name: 'remark',
                         editable: true,
                     },{
                         name: 'id',

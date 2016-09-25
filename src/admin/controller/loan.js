@@ -55,8 +55,38 @@ export default class extends Base {
   async editAction(){
     let { oper, ...data} = this.param();
 
+    let st;
+    if(data.start_time){
+      st = moment(data.start_time, 'YYYY-MM-DD');
+      data.start_time = st.unix();
+    }
+    if(data.end_time) data.end_time = moment(data.end_time, 'YYYY-MM-DD').unix();
+
     if(oper == 'add'){
-      await this.loan.add(data);
+
+      let { money, total_stage, start_time } = data;
+      let m = null;
+      let stageNum = 0;
+      if(total_stage && (m = total_stage.match(/\d+/))){
+        stageNum = m[0];
+      }
+      money = _.parseInt(money);
+      data.end_time = moment(st).add('day', 7 * stageNum).unix();
+      let loan_id = await this.loan.add(data);
+
+
+      console.log([loan_id, stageNum, money, st]);
+      if(loan_id && stageNum > 0 && money && stageNum < 40 && st){
+        let lixi_1 = Math.floor(money / 1000 * 21);
+        let benjin_1 = Math.floor(money / stageNum);
+
+        for(let i = 0; i < stageNum; i++){
+          await this.loanStage.add({
+            loan_id, stage:i+1,lixi_1,lixi_2:0,benjin_1,benjin_2:0, end_time: st.unix()
+          });
+          st.add(7,'day');
+        }
+      }
     }else if(oper == 'edit'){
       let { id, ...udata} = data;
       await this.loan.where({id}).update(udata);
@@ -151,7 +181,7 @@ export default class extends Base {
             for(; i < stageNum-1; i++){
               start_time.add(7,'day');
               await this.loanStage.add({
-                loan_id, stage:i+1, lixi_1,benjin_1,end_time: start_time.unix()
+                loan_id, stage:i+2, lixi_1,benjin_1,end_time: start_time.unix()
               })
             }
 
