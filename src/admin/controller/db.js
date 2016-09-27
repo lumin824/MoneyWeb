@@ -22,7 +22,7 @@ export default class extends Base {
   async resetloanAction(){
 
     await this.loan.execute('truncate table think_loan');
-    await this.loanStage.delete('truncate table think_loan_stage');
+    await this.loanStage.execute('truncate table think_loan_stage');
     return this.json({errno:200});
   }
 }
