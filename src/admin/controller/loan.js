@@ -162,27 +162,23 @@ export default class extends Base {
             let lixi_1 = Math.floor(money / 1000 * 21);
             let benjin_1 = Math.floor(money / stageNum);
 
-            await this.loanStage.add({
-              loan_id, stage:1,lixi_1,lixi_2:lixi_1,benjin_1,benjin_2:benjin_1, end_time: start_time.unix()
-            });
-
             for(; i < 100; i++){
               let lixi = stageList[i*3+0];
               let benjin = stageList[i*3+1];
               if(lixi && benjin){
                 start_time.add(7,'day');
                 await this.loanStage.add({
-                  loan_id, stage:i+2,lixi_1,lixi_2:lixi,benjin_1,benjin_2:benjin, end_time: start_time.unix()
+                  loan_id, stage:i+1,lixi_1,lixi_2:lixi,benjin_1,benjin_2:benjin, end_time: start_time.unix()
                 })
               }else{
                 break;
               }
             }
 
-            for(; i < stageNum-1; i++){
+            for(; i < stageNum; i++){
               start_time.add(7,'day');
               await this.loanStage.add({
-                loan_id, stage:i+2, lixi_1,benjin_1,end_time: start_time.unix()
+                loan_id, stage:i+1, lixi_1,benjin_1,end_time: start_time.unix()
               })
             }
 
