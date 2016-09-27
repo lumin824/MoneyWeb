@@ -246,7 +246,7 @@ export default class extends Base {
   async qianfeiAction(){
     let now = moment().unix();
     let list = await this.loanStage
-    .field('a.*,b.mobile,b.name,b.icloud')
+    .field('a.*,b.mobile,b.name,b.icloud,b.money')
     .alias('a')
     .join({
       table:'loan',
@@ -262,6 +262,7 @@ export default class extends Base {
         name:o[0].name,
         mobile:o[0].mobile,
         icloud:o[0].icloud,
+        money:o[0].money,
         pay_time:o[0].end_time,
         sum_stage: _.size(o),
         sum_lixi: _.sumBy(o, 'lixi_1') - _.sumBy(o, 'lixi_2'),
