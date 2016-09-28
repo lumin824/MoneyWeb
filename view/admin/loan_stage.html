@@ -39,7 +39,6 @@
                                    <th>管理费(应还)</th>
                                    <th>本金(已还)</th>
                                    <th>本金(应还)</th>
-                                   <th>操作</th>
                                </tr>
                            </thead>
                            <tbody>
@@ -51,9 +50,12 @@
                                    <td>{{o.lixi_1}}</td>
                                    <td><input type="text" name="benjin_2" value="{{o.benjin_2}}"></td>
                                    <td>{{o.benjin_1}}</td>
-                                   <td><button class="btn btn-primary btn-xs btn-save" type="button">保存</button></td>
                                </tr>
                                {% endfor %}
+
+                               <tr>
+                                   <td colspan="7"><button class="btn btn-primary btn-xs btn-save" type="button">保存</button></td>
+                               </tr>
                            </tbody>
                        </table>
 
@@ -89,7 +91,35 @@
                radioClass: 'iradio_square-green',
            });
 
+           $('.btn-save').click(function(){
+
+             var data = $('tr[data-id]').map(function(){
+               var $root = $(this);
+               var data = {};
+               $root.find('input').each(function(o){
+                 data[this.name] = this.value;
+               });
+               data.id = $root.data('id');
+               return data;
+             })
+
+             var url = '/admin/loan/stage', type = 'post';
+             $.ajax({
+               url: url,
+               type: type,
+               data: {json: JSON.stringify(data.toArray())},
+               success: function(resp){
+                 if(resp.errno == 200){
+                   alert('修改成功')
+                 }else{
+                   alert(resp.errmsg);
+                 }
+               }
+             });
+           });
+
            $('table tbody').on('click', '.btn-save', function(){
+             return;
              $root = $(this).parents('tr');
              var data = {};
              $root.find('input').each(function(o){

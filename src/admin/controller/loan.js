@@ -40,7 +40,7 @@ export default class extends Base {
     }
 
     if(sidx && sord){
-      this.loan.order({[sidx]:sord});
+      this.db.order({[sidx]:sord});
     }
 
     let data = await this.loan.page(page, rows).countSelect();
@@ -74,8 +74,6 @@ export default class extends Base {
       data.end_time = moment(st).add('day', 7 * stageNum).unix();
       let loan_id = await this.loan.add(data);
 
-
-      console.log([loan_id, stageNum, money, st]);
       if(loan_id && stageNum > 0 && money && stageNum < 40 && st){
         let lixi_1 = Math.floor(money / 1000 * 21);
         let benjin_1 = Math.floor(money / stageNum);
@@ -107,8 +105,19 @@ export default class extends Base {
       this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
       return this.display();
     }else{
-      let {id, ...data} = this.param();
-      await this.loanStage.where({id:id}).update(data);
+      let {id, json, ...data} = this.param();
+      if(json){
+        let self = this;
+        let arr = JSON.parse(json);
+        _.each(arr, async o=>{
+          let {id, ...data} = o;
+          await this.loanStage.where({id:id}).update(data);
+        });
+        console.log(arr);
+      }else{
+        await this.loanStage.where({id:id}).update(data);
+      }
+
       return this.json({errno:200});
     }
 
@@ -185,7 +194,6 @@ export default class extends Base {
 
           }
 
-          console.log(ret)
         });
       });
       return this.json({"jsonrpc" : "2.0", "result" : null, "id" : "id"});
