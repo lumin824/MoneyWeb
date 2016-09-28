@@ -23,6 +23,7 @@ CREATE TABLE `think_loan` (
   `end_time` bigint(20) NOT NULL DEFAULT '0' COMMENT '结束日期',
   `icloud` char(255) NOT NULL DEFAULT '' COMMENT '苹果账号',
   `remark` char(255) COMMENT '备注',
+  `update_time` bigint(20) comment '更新日期',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 

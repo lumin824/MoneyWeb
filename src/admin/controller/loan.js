@@ -100,23 +100,38 @@ export default class extends Base {
 
     if(this.isGet()){
       let {id} = this.param();
-
+      let loan = await this.loan.where({id}).find();
       let list = await this.loanStage.where({loan_id:id}).select();
+      let update_time = loan.update_time ? moment.unix(loan.update_time).format('YYYY-MM-DD hh:mm:ss') : '无';
+      this.assign('loan', {...loan, update_time});
       this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
       return this.display();
     }else{
       let {id, json, ...data} = this.param();
+      let loan_id;
       if(json){
         let self = this;
         let arr = JSON.parse(json);
-        _.each(arr, async o=>{
+
+        for(let i in arr){
+          let o = arr[i];
           let {id, ...data} = o;
+          if(!loan_id){
+            let stage = await this.loanStage.where({id}).find();
+            if(stage) loan_id = stage.loan_id;
+            console.log(loan_id);
+          }
           await this.loanStage.where({id:id}).update(data);
-        });
-        console.log(arr);
+        }
       }else{
-        await this.loanStage.where({id:id}).update(data);
+        let stage = await this.loanStage.where({id}).find();
+        if(stage) loan_id = stage.loan_id;
+        await this.loanStage.where({id}).update(data);
       }
+      if(loan_id){
+        await this.loan.where({id:loan_id}).update({update_time:moment().unix()})
+      }
+
 
       return this.json({errno:200});
     }
