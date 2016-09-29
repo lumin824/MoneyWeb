@@ -1,13 +1,9 @@
 DROP TABLE IF EXISTS `think_user`;
 CREATE TABLE `think_user` (
   `id` int(16) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
-  `pid` int(16) unsigned COMMENT '父用户ID',
-  `name` char(255) NOT NULL COMMENT '姓名',
   `password` char(255) NOT NULL COMMENT '密码',
   `mobile` char(255) NOT NULL DEFAULT '' COMMENT '用户手机',
-  `canLoginAdmin` char(255) NOT NULL DEFAULT 'false' COMMENT '是否可以登录后台',
   PRIMARY KEY (`id`),
-  KEY `pid` (`pid`),
   UNIQUE KEY `mobile` (`mobile`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 

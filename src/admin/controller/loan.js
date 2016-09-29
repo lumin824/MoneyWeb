@@ -9,10 +9,12 @@ var x = require('xlsx');
 
 export default class extends Base {
 
-  init(http){
+  async init(http){
     super.init(http);
     this.loan = this.model('loan');
     this.loanStage = this.model('loan_stage');
+    let userInfo = await this.session('userInfo');
+    this.userId = userInfo.id;
   }
 
   indexAction(){
@@ -24,20 +26,17 @@ export default class extends Base {
   }
 
   async listAction(){
+    let { userId:user_id } = this;
     let { page, rows, searchField, searchString, searchOper, sidx, sord, key} = this.param();
 
     let db = this.loan;
 
-    let where2;
+    let where = {'user_id':user_id};
     if(key){
-      where2 = `(mobile like '%${key}%' or name like '%${key}%' or icloud like '%${key}%' or idno like '%${key}%')`;
+      where['mobile|name|icloud|idno']=['like', `%${key}%`];
     }
 
-    let where = _.compact([where2]).join(' and ');
-
-    if(where){
-      this.loan.where(where);
-    }
+    this.loan.where(where);
 
     if(sidx && sord){
       this.db.order({[sidx]:sord});
@@ -53,6 +52,7 @@ export default class extends Base {
   }
 
   async editAction(){
+    let { userId:user_id } = this;
     let { oper, ...data} = this.param();
 
     let st;
@@ -72,6 +72,7 @@ export default class extends Base {
       }
       money = _.parseInt(money);
       data.end_time = moment(st).add('day', 7 * stageNum).unix();
+      data.user_id = user_id;
       let loan_id = await this.loan.add(data);
 
       if(loan_id && stageNum > 0 && money && stageNum < 40 && st){
@@ -140,6 +141,7 @@ export default class extends Base {
   }
 
   async uploadAction(){
+    let { userId:user_id } = this;
     if(this.isPost()){
       let year = moment().year();
       _.each(this.file(), o=>{
@@ -178,7 +180,7 @@ export default class extends Base {
             let end_time = moment(end_date, 'YYYY.MM.DD');
             let loan_id = await this.loan.add({
               start_time: start_time.unix(),end_time:end_time.unix(),
-              mobile,idno,name,money,total_stage:stage,icloud
+              mobile,idno,name,money,total_stage:stage,icloud,user_id
             });
 
             money = _.parseInt(money);
@@ -221,6 +223,7 @@ export default class extends Base {
 
   async repayAction(){
     if(this.isAjax()){
+      let { userId:user_id } = this;
       let { page, rows, searchField, searchString, searchOper, sidx, sord} = this.param();
 
       this.loanStage
@@ -234,18 +237,21 @@ export default class extends Base {
         }).order({'end_time':'asc'});
 
       let { lixi, benjin, key } = this.param();
-      let where1 = _.compact([ lixi == 'true' && 'a.lixi_1 > a.lixi_2', benjin == 'true' && 'a.benjin_1 > a.benjin_2']).join(' or ');
 
-      let where2;
+      let where = { 'b.user_id':user_id};
+
+      if(lixi == 'true' || benjin == 'true'){
+        let where_lixi_benjin = { _logic: 'or' };
+        if(lixi == 'true') where_lixi_benjin['a.lixi_1'] = ['EXP', '>a.lixi_2'];
+        if(benjin == 'true') where_lixi_benjin['a.benjin_1'] = ['EXP', '>a.benjin_2'];
+        where['_complex'] = where_lixi_benjin;
+      }
+
       if(key){
-        where2 = `(b.mobile like '%${key}%' or b.name like '%${key}%' or b.icloud like '%${key}%')`;
+          where['mobile|name|icloud']=['like', `%${key}%`];
       }
 
-      let where = _.compact([where1, where2]).join(' and ');
-
-      if(where){
-        this.loanStage.where(where);
-      }
+      this.loanStage.where(where);
 
       let data = await this.loanStage.page(page, rows).countSelect();
       return this.json({
@@ -261,12 +267,14 @@ export default class extends Base {
   }
 
   async statAction(){
-    let list = await this.loanStage.query('select ym,sum(lixi_1) as lixi_1,sum(lixi_2) as lixi_2,sum(benjin_1) as benjin_1,sum(benjin_2) as benjin_2 from (select *, date_format(from_unixtime(end_time),\'%Y-%m\') as ym from think_loan_stage) a group by ym order by ym desc;');
+    let { userId:user_id } = this;
+    let list = await this.loanStage.query(`select ym,sum(lixi_1) as lixi_1,sum(lixi_2) as lixi_2,sum(benjin_1) as benjin_1,sum(benjin_2) as benjin_2 from (select x.*, date_format(from_unixtime(x.end_time),\'%Y-%m\') as ym from think_loan_stage x left join think_loan y on x.loan_id=y.id where y.user_id=${user_id}) a group by ym order by ym desc;`);
     this.assign('list', list);
     return this.display();
   }
 
   async qianfeiAction(){
+    let { userId:user_id } = this;
     let now = moment().unix();
     let list = await this.loanStage
     .field('a.*,b.mobile,b.name,b.icloud,b.money')
@@ -276,7 +284,8 @@ export default class extends Base {
       as:'b',
       join:'left',
       on:['loan_id','id']
-    }).where(`(a.benjin_1 > a.benjin_2 or a.lixi_1 > a.lixi_2) and a.end_time < ${now}`).order('a.end_time asc').select();
+    //}).where(`(a.benjin_1 > a.benjin_2 or a.lixi_1 > a.lixi_2) and a.end_time < ${now}`).order('a.end_time asc').select();
+  }).where({'a.benjin_1':['exp', '>a.benjin_2 or a.lixi_1>a.lixi_2'], 'a.end_time':['<',now], 'b.user_id':user_id}).order('a.end_time asc').select();
 
     list = _.map(list, o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')}));
     let group = _.map(_.groupBy(list,'loan_id'), (o,k)=>({

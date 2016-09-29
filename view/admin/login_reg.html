@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-    <title>登录 - 帮你贷</title>
+    <title>注册 - 帮你贷</title>
     <meta name="keywords" content="">
     <meta name="description" content="">
     <link href="/static/hp/css/bootstrap.min.css" rel="stylesheet">
@@ -27,35 +27,19 @@
 <body class="signin">
     <div class="signinpanel">
         <div class="row">
-            <div class="col-sm-7">
-                <div class="signin-info">
-                    <div class="logopanel m-b">
-                        <h1>[ 帮你贷管理后台 ]</h1>
-                    </div>
-                    <div class="m-b"></div>
-                    <h4>欢迎使用 <strong>帮你贷管理后台</strong></h4>
-                    <ul class="m-b">
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 快捷</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 方便</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 安全</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 可靠</li>
-                        <li><i class="fa fa-arrow-circle-o-right m-r-xs"></i> 稳定</li>
-                    </ul>
-                    <strong>还没有账号？ <a href="/admin/login/reg">立即注册&raquo;</a></strong>
-                </div>
-            </div>
-            <div class="col-sm-5">
-                <form method="post" action="/admin/login" method="post">
-                    <h4 class="no-margins">登录：</h4>
-                    <p class="m-t-md">登录到帮你贷管理后台</p>
+            <div class="col-sm-6 col-sm-offset-3">
+                <form method="post" action="/admin/login/reg" method="post">
+                    <h4 class="no-margins">注册：</h4>
                     <div>
                       <input type="text" class="form-control uname" name="username" placeholder="用户名" required="" aria-required="true" />
                     </div>
                     <div>
                       <input type="password" class="form-control pword m-b" name="password" placeholder="密码" required="" aria-required="true" />
                     </div>
-                    <a href="">忘记密码了？</a>
-                    <button class="btn btn-success btn-block">登录</button>
+                    <div>
+                      <input type="password" class="form-control pword m-b" name="password2" placeholder="确认密码" required="" aria-required="true" />
+                    </div>
+                    <button class="btn btn-success btn-block">注册</button>
                 </form>
             </div>
         </div>
@@ -79,12 +63,21 @@
     <script>
       $(function(){
         $('form').validate({
+          rules:{
+            password2:{
+              equalTo:'[name=password]'
+            }
+          },
           messages: {
             username:{
               required:'请输入用户名'
             },
             password:{
               required:'请输入密码'
+            },
+            password2:{
+              required:'请输入确认密码',
+              equalTo: "*请再次输入相同的值"
             }
           },
           submitHandler:function(form){
