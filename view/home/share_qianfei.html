@@ -42,7 +42,6 @@
                                  <th>累计期数</th>
                                  <th>累计利息</th>
                                  <th>累计本金</th>
-                                 <th>操作</th>
                              </tr>
                          </thead>
                          <tbody>
@@ -84,8 +83,7 @@
                                  <td>{{o.info.sum_stage}}</td>
                                  <td>{{o.info.sum_lixi}}</td>
                                  <td>{{o.info.sum_benjin}}</td>
-                                 <td><button class="btn btn-primary btn-xs J_openTab" type="button" href="/admin/loan/stage?id={{o.info.id}}" data-index="loan_{{o.info.id}}">查看分期</button></td>
-                             </tr>
+                               </tr>
                              {% endfor %}
                          </tbody>
                      </table>
@@ -104,8 +102,6 @@
    <!-- Peity -->
    <script src="/static/hp/js/plugins/peity/jquery.peity.min.js"></script>
 
-   <!-- 自定义js -->
-   <script src="/static/hp/js/content.js?v=1.0.0"></script>
 
 
    <!-- iCheck -->

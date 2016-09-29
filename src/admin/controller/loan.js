@@ -275,7 +275,12 @@ export default class extends Base {
 
   async qianfeiAction(){
     let { userId:user_id } = this;
-    let now = moment().unix();
+    let now = moment();
+    now.hour(0);
+    now.minute(0);
+    now.second(0);
+    now.millisecond(0);
+    now = now.unix();
     let list = await this.loanStage
     .field('a.*,b.mobile,b.name,b.icloud,b.money')
     .alias('a')
@@ -303,6 +308,10 @@ export default class extends Base {
       items:o}));
     this.assign('group', _.sortBy(group, 'info.pay_time'));
     this.assign('list', list);
+
+    console.log(this.http);
+    this.assign('link',`http://${this.http.host}/share/qianfei?id=${user_id}`);
+
     return this.display();
   }
 }
