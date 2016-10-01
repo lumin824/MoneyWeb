@@ -6,6 +6,7 @@ import moment from 'moment';
 
 var xlsx = require('node-xlsx');
 var x = require('xlsx');
+import fs from 'fs';
 
 export default class extends Base {
 
@@ -29,8 +30,6 @@ export default class extends Base {
     let { userId:user_id } = this;
     let { page, rows, searchField, searchString, searchOper, sidx, sord, key} = this.param();
 
-    let db = this.loan;
-
     let where = {'user_id':user_id};
     if(key){
       where['mobile|name|icloud|idno']=['like', `%${key}%`];
@@ -39,7 +38,9 @@ export default class extends Base {
     this.loan.where(where);
 
     if(sidx && sord){
-      this.db.order({[sidx]:sord});
+      this.loan.order({[sidx]:sord});
+    }else{
+      this.loan.order({id:'asc'});
     }
 
     let data = await this.loan.page(page, rows).countSelect();
@@ -102,7 +103,7 @@ export default class extends Base {
     if(this.isGet()){
       let {id} = this.param();
       let loan = await this.loan.where({id}).find();
-      let list = await this.loanStage.where({loan_id:id}).select();
+      let list = await this.loanStage.where({loan_id:id}).order({'id':'asc'}).select();
       let update_time = loan.update_time ? moment.unix(loan.update_time).format('YYYY-MM-DD hh:mm:ss') : '无';
       this.assign('loan', {...loan, update_time});
       this.assign('list', _.map(list,o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')})));
@@ -313,5 +314,38 @@ export default class extends Base {
     this.assign('link',`http://${this.http.host}/share/qianfei?id=${user_id}`);
 
     return this.display();
+  }
+
+  async downloadAction(){
+    let { userId:user_id } = this;
+    let loanList = await this.loan.where({user_id}).order({id:'asc'}).select();
+
+    let loanStageList = await this.loanStage
+    .field('a.*')
+    .alias('a')
+    .join({
+      table:'loan',
+      as:'b',
+      join:'left',
+      on:['loan_id','id']
+    })
+    .where({'b.user_id':user_id}).order({'a.id':'asc'}).select();
+
+    let data = _.map(loanList, o=>{
+      let stage = _(loanStageList).filter({loan_id:o.id})
+          .map(o=>[o.lixi_2, o.benjin_2, moment.unix(o.end_time).format('YYYY-MM-DD')])
+          .flatten()
+          .value();
+      return [
+        moment.unix(o.start_time).format('YYYY-MM-DD'),
+        moment.unix(o.end_time).format('YYYY-MM-DD'),
+        o.mobile,o.idno,o.name,o.money,o.total_stage, ...stage, o.icloud
+      ];
+    });
+    let ss = [1,2,3,4,5,6,7,8,9,10,11,12];
+    let workbook = xlsx.build([{name:'Sheet1', data:[['日期','到期','电话号码','身份证','姓名','借款金额','周期',..._(ss).map(o=>[`${o}期利息`,'本金','还款日']).flatten().value()],...data]}]);
+    let filepath = `./${user_id}.xlsx`;
+    fs.writeFileSync(filepath, workbook, 'binary');
+    return this.download(filepath);
   }
 }
