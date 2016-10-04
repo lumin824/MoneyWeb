@@ -1,6 +1,7 @@
 'use strict';
 
 import Base from './base.js';
+import moment from 'moment';
 
 export default class extends Base {
 
@@ -22,6 +23,7 @@ export default class extends Base {
         return this.json({errno:600,errmsg:'错误的用户名密码'});
       }else{
         let { id, mobile } = user;
+        await this.model('user').where({id}).update({login_time:moment().unix()});
         await this.session('userInfo',{username, id, mobile});
         return this.json({errno:200,redirect:'/admin'})
       }
