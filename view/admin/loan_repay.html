@@ -135,16 +135,18 @@
                         width:100,
                         sortable:false,
                         formatter: function(cell, opt, row){
-                          let ret = row.lixi_2 + '/' + row.lixi_1;
-                          if(row.lixi_2 < row.lixi_1) ret = '<p class="text-danger">'+ret+'</p>';
+                          var ret = row.lixi_2 + '/' + row.lixi_1;
+                          if(row.lixi) ret += '(已还)';
+                          if(row.lixi_2 < row.lixi_1 && row.lixi == 0) ret = '<p class="text-danger">'+ret+'</p>';
                           return ret;
                         }
                     },{
                         width:100,
                         sortable:false,
                         formatter: function(cell, opt, row){
-                          let ret = row.benjin_2 + '/' + row.benjin_1;
-                          if(row.benjin_2 < row.benjin_1) ret = '<p class="text-danger">'+ret+'</p>';
+                          var ret = row.benjin_2 + '/' + row.benjin_1;
+                          if(row.benjin) ret += '(已还)';
+                          if(row.benjin_2 < row.benjin_1 && row.benjin == 0) ret = '<p class="text-danger">'+ret+'</p>';
                           return ret;
                         }
                     },{

@@ -46,9 +46,13 @@
                                <tr data-id="{{o.id}}">
                                    <td>{{o.stage}}</td>
                                    <td>{{o.end_time}}</td>
-                                   <td><input type="text" name="lixi_2" value="{{o.lixi_2}}"></td>
+                                   <td><input type="text" name="lixi_2" value="{{o.lixi_2}}">
+                                     <label><input type="checkbox" name="lixi" value="1" {{'checked' if o.lixi else '' }} /> 还清?</label>
+                                   </td>
                                    <td>{{o.lixi_1}}</td>
-                                   <td><input type="text" name="benjin_2" value="{{o.benjin_2}}"></td>
+                                   <td><input type="text" name="benjin_2" value="{{o.benjin_2}}">
+                                     <label><input type="checkbox" name="benjin" value="1" {{'checked' if o.benjin else '' }}  /> 还清?</label>
+                                   </td>
                                    <td>{{o.benjin_1}}</td>
                                </tr>
                                {% endfor %}
@@ -100,9 +104,12 @@
              var data = $('tr[data-id]').map(function(){
                var $root = $(this);
                var data = {};
-               $root.find('input').each(function(o){
+               $root.find(':text').each(function(o){
                  data[this.name] = this.value;
                });
+               $root.find(':checkbox').each(function(o){
+                 data[this.name] = this.checked ? this.value : 0;
+               })
                data.id = $root.data('id');
                return data;
              })

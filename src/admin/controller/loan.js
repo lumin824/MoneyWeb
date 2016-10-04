@@ -243,8 +243,8 @@ export default class extends Base {
 
       if(lixi == 'true' || benjin == 'true'){
         let where_lixi_benjin = { _logic: 'or' };
-        if(lixi == 'true') where_lixi_benjin['a.lixi_1'] = ['EXP', '>a.lixi_2'];
-        if(benjin == 'true') where_lixi_benjin['a.benjin_1'] = ['EXP', '>a.benjin_2'];
+        if(lixi == 'true') where_lixi_benjin['a.lixi_1'] = ['EXP', '>a.lixi_2 and a.lixi=0'];
+        if(benjin == 'true') where_lixi_benjin['a.benjin_1'] = ['EXP', '>a.benjin_2 and a.benjin=0'];
         where['_complex'] = where_lixi_benjin;
       }
 
@@ -291,7 +291,9 @@ export default class extends Base {
       join:'left',
       on:['loan_id','id']
     //}).where(`(a.benjin_1 > a.benjin_2 or a.lixi_1 > a.lixi_2) and a.end_time < ${now}`).order('a.end_time asc').select();
-  }).where({'a.benjin_1':['exp', '>a.benjin_2 or a.lixi_1>a.lixi_2'], 'a.end_time':['<',now], 'b.user_id':user_id}).order('a.end_time asc').select();
+  //}).where({'a.benjin_1':['exp', '>a.benjin_2 or a.lixi_1>a.lixi_2'], 'a.end_time':['<',now], 'b.user_id':user_id})
+}).where(`((a.benjin_1>a.benjin_2 and a.benjin=0) or (a.lixi_1>a.lixi_2 and a.lixi=0)) and a.end_time<${now} and b.user_id=${user_id}`)
+  .order('a.end_time asc').select();
 
     list = _.map(list, o=>({...o,end_time:moment.unix(o.end_time).format('YYYY-MM-DD')}));
     let group = _.map(_.groupBy(list,'loan_id'), (o,k)=>({
@@ -303,14 +305,13 @@ export default class extends Base {
         money:o[0].money,
         pay_time:o[0].end_time,
         sum_stage: _.size(o),
-        sum_lixi: _.sumBy(o, 'lixi_1') - _.sumBy(o, 'lixi_2'),
-        sum_benjin: _.sumBy(o, 'benjin_1') - _.sumBy(o, 'benjin_2')
+        sum_lixi: _.sumBy(o, p=>p.lixi?0:p.lixi_1-p.lixi_2),
+        sum_benjin: _.sumBy(o, p=>p.benjin?0:p.benjin_1-p.benjin_2)
       },
       items:o}));
     this.assign('group', _.sortBy(group, 'info.pay_time'));
     this.assign('list', list);
 
-    console.log(this.http);
     this.assign('link',`http://${this.http.host}/share/qianfei?id=${user_id}`);
 
     return this.display();
