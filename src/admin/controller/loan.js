@@ -150,9 +150,19 @@ export default class extends Base {
 
         let [header, ...data] = list[0].data;
 
+        let is_new_version = false;
+        if('苹果ID账号' == header[7]){
+          is_new_version = true;
+        }
+
         _.each(data, async row => {
-          let [end_date,start_date,mobile,idno,name,money,stage, ...stageList] = row;
-          let icloud = stageList[12*3-1];
+          let end_date,start_date,mobile,idno,name,money,stage, icloud,stageList;
+          if(is_new_version){
+            ([end_date,start_date,mobile,idno,name,money,stage, icloud, ...stageList] = row);
+          }else{
+            ([end_date,start_date,mobile,idno,name,money,stage, ...stageList] = row);
+            icloud = stageList[12*3-1];
+          }
           if(mobile && idno && name && money && stage){
             let m = null;
             if(_.isNumber(start_date)){
@@ -340,11 +350,12 @@ export default class extends Base {
       return [
         moment.unix(o.start_time).format('YYYY-MM-DD'),
         moment.unix(o.end_time).format('YYYY-MM-DD'),
-        o.mobile,o.idno,o.name,o.money,o.total_stage, ...stage, o.icloud
+        o.mobile,o.idno,o.name,o.money,o.total_stage,o.icloud, ...stage
       ];
     });
-    let ss = [1,2,3,4,5,6,7,8,9,10,11,12];
-    let workbook = xlsx.build([{name:'Sheet1', data:[['日期','到期','电话号码','身份证','姓名','借款金额','周期',..._(ss).map(o=>[`${o}期利息`,'本金','还款日']).flatten().value()],...data]}]);
+    let ss = [];
+    for(let i=1;i<=24;i++) ss.push(i);
+    let workbook = xlsx.build([{name:'Sheet1', data:[['日期','到期','电话号码','身份证','姓名','借款金额','周期','苹果ID账号',..._(ss).map(o=>[`${o}期利息`,'本金','还款日']).flatten().value()],...data]}]);
     let filepath = `./${user_id}.xlsx`;
     fs.writeFileSync(filepath, workbook, 'binary');
     return this.download(filepath);
