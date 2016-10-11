@@ -202,11 +202,11 @@ export default class extends Base {
             let benjin_1 = Math.floor(money / stageNum);
 
             for(; i < 100; i++){
-              let lixi_2 = stageList[i*stage_step+0];
-              let benjin_2 = stageList[i*stage_step+1];
+              let lixi_2 = stageList[i*stage_step+0] || 0;
+              let benjin_2 = stageList[i*stage_step+1] || 0;
               let lixi = 0, benjin = 0;
               if(is_new_version) ([lixi,benjin]= stageList[i*stage_step+3].split(',')) ;
-              if(lixi_2 && benjin_2){
+              if(lixi_2 || benjin_2 || lixi || benjin){
 
                 await this.loanStage.add({
                   loan_id, stage:i+1,lixi,lixi_1,lixi_2,benjin,benjin_1,benjin_2, end_time: start_time.unix()
