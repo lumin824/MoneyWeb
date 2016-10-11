@@ -158,7 +158,7 @@ export default class extends Base {
         _.each(data, async row => {
           let end_date,start_date,mobile,idno,name,money,stage, icloud,stageList;
           if(is_new_version){
-            ([end_date,start_date,mobile,idno,name,money,stage, icloud, ...stageList] = row);
+            ([start_date,end_date,mobile,idno,name,money,stage, icloud, ...stageList] = row);
           }else{
             ([end_date,start_date,mobile,idno,name,money,stage, ...stageList] = row);
             icloud = stageList[12*3-1];
