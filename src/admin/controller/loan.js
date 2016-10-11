@@ -151,8 +151,10 @@ export default class extends Base {
         let [header, ...data] = list[0].data;
 
         let is_new_version = false;
+        let stage_step = 3;
         if('苹果ID账号' == header[7]){
           is_new_version = true;
+          stage_step = 4;
         }
 
         _.each(data, async row => {
@@ -200,12 +202,14 @@ export default class extends Base {
             let benjin_1 = Math.floor(money / stageNum);
 
             for(; i < 100; i++){
-              let lixi = stageList[i*3+0];
-              let benjin = stageList[i*3+1];
-              if(lixi && benjin){
+              let lixi_2 = stageList[i*stage_step+0];
+              let benjin_2 = stageList[i*stage_step+1];
+              let lixi = 0, benjin = 0;
+              if(is_new_version) ([lixi,benjin]= stageList[i*stage_step+3].split(',')) ;
+              if(lixi_2 && benjin_2){
 
                 await this.loanStage.add({
-                  loan_id, stage:i+1,lixi_1,lixi_2:lixi,benjin_1,benjin_2:benjin, end_time: start_time.unix()
+                  loan_id, stage:i+1,lixi,lixi_1,lixi_2,benjin,benjin_1,benjin_2, end_time: start_time.unix()
                 })
                 start_time.add(7,'day');
               }else{
@@ -344,7 +348,7 @@ export default class extends Base {
 
     let data = _.map(loanList, o=>{
       let stage = _(loanStageList).filter({loan_id:o.id})
-          .map(o=>[o.lixi_2, o.benjin_2, moment.unix(o.end_time).format('YYYY-MM-DD')])
+          .map(o=>[o.lixi_2, o.benjin_2,moment.unix(o.end_time).format('YYYY-MM-DD'), [o.lixi,o.benjin].join(',')])
           .flatten()
           .value();
       return [
@@ -355,7 +359,7 @@ export default class extends Base {
     });
     let ss = [];
     for(let i=1;i<=24;i++) ss.push(i);
-    let workbook = xlsx.build([{name:'Sheet1', data:[['日期','到期','电话号码','身份证','姓名','借款金额','周期','苹果ID账号',..._(ss).map(o=>[`${o}期利息`,'本金','还款日']).flatten().value()],...data]}]);
+    let workbook = xlsx.build([{name:'Sheet1', data:[['日期','到期','电话号码','身份证','姓名','借款金额','周期','苹果ID账号',..._(ss).map(o=>[`${o}期利息`,'本金','还款日','本金还清,利息还清']).flatten().value()],...data]}]);
     let filepath = `./${user_id}.xlsx`;
     fs.writeFileSync(filepath, workbook, 'binary');
     return this.download(filepath);
