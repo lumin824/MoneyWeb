@@ -3,6 +3,7 @@ CREATE TABLE `think_user` (
   `id` int(16) unsigned NOT NULL AUTO_INCREMENT COMMENT '用户ID',
   `password` char(255) NOT NULL COMMENT '密码',
   `mobile` char(255) NOT NULL DEFAULT '' COMMENT '用户手机',
+  `login_time` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `mobile` (`mobile`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
@@ -34,5 +35,7 @@ CREATE TABLE `think_loan_stage` (
   `benjin_1` decimal(8,2) NOT NULL DEFAULT '0.00' COMMENT '应还本金',
   `benjin_2` decimal(8,2) NOT NULL DEFAULT '0.00' COMMENT '已还本金',
   `end_time` bigint(20) NOT NULL COMMENT '最迟还款时间',
+  `lixi` tinyint(1) DEFAULT '0',
+  `benjin` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
